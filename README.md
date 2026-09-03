@@ -96,6 +96,19 @@ gbit-container stack gbit-db
 gbit-container dashboard
 ```
 
+# Dashboard app web
+
+
+
+<p align="center">
+  <img src="assets/gbit-container-dashboard.png" width="1000">
+</p>
+
+# GBit-DB + Next.js
+
+<p align="center">
+
+
 
 ## Nao precisa rodar o projeto  e so copiar a url para o navegador, o gbit-conatiner ja subiu tudo:
 
@@ -197,6 +210,10 @@ meu-projeto/
 
 # Autor
 # email gislainelophes@gmail.com
+
+## Licença
+
+MIT
 
 
 

@@ -38,7 +38,7 @@
 
 </p>
 
-# GBIT DB CLI
+# GBIT DB 
 
 <p align="center">
   <strong>
@@ -81,9 +81,15 @@ _ gbit-container dashboard
 
 ## Dashboard app web
 
+
+
 <p align="center">
-  <img src="assets/gbit-container-dashboard.png" width="1200">
+  <img src="assets/gbit-container-dashboard.png" width="1000">
 </p>
+
+# GBit-DB + Next.js
+
+<p align="center">
 
 
 ## As 4 URLs
@@ -92,7 +98,7 @@ _ gbit-container dashboard
 |---|---|---|---|
 | App Next.js | raiz do projeto | `npm run dev` | http://localhost:3000 |
 | GBIT Portal | raiz do projeto | `npm run portal` | http://localhost:4100/portal |
-| GBIT Container | raiz do projeto | `gbit-container run --watch` | http://localhost:4300 |
+| GBIT Container | raiz do projeto | `gbit-container run --watch` | http://localhost:7890 |
 | GBIT Database (gbit-db-dados) | pasta `gbit-database/` | `node server.js` | http://localhost:4200 |
 
 O Portal roda em uma segunda instância Next com `distDir` próprio (`.next-portal`), então app e portal convivem sem conflito de build.
@@ -107,7 +113,7 @@ gbit-container ps            # ID  NAME  STATUS  PORT  PID  UPTIME
 gbit-container stop api
 gbit-container restart api
 gbit-container logs api -f
-gbit-container run --watch   # console interativo + dashboard :4300
+gbit-container run --watch   # console interativo + dashboard :7890
 ```
 
 `gbit-container.json`:
@@ -169,7 +175,7 @@ meu-projeto/
 ## Banco de dados com Gbit-db-dados integra com seu backend 
 
 <p align="center">
-  <img src="assets/imagem-modo-uso-dados.png" width="1200">
+  <img src="gbit-db/assets/imagem-modo-uso-dados.png" width="1200">
 </p>
 
 # Autor
