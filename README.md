@@ -23,7 +23,7 @@
 </p>
 
 <p align="center">
-  📦 <a href="https://www.npmjs.com/package/gbit-db-cli">Pacote no npm</a> ·
+  📦 <a href="https://www.npmjs.com/package/gbit-db">Pacote no npm</a> ·
   💻 <a href="https://github.com/Gislaine-programadora">Perfil no GitHub</a>
 </p>
 
@@ -32,7 +32,8 @@ npx gbit-db meu-projeto
 ```
 
 ---
-
+ # <img src="https://img.shields.io/npm/v/gbit-db?style=for-the-badge&label=npm&color=CB3837&logo=npm&logoColor=white" alt="npm version" valign="middle"> GBIT DB
+ 
 ## O que é o GBIT DB
 
 O `gbit-db` não é só um scaffold de Next.js — é uma **engine de backend pronta pra uso**, com o banco de dados já plugado:
