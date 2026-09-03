@@ -2,18 +2,13 @@
   <img
     src="assets/gbit-db.png"
     alt="GBIT-DB - Backend completo Next.js"
-    width="60%"
+    width="100%"
   />
 </p>
 
 
 <p align="center">
 
-  <img src="https://img.shields.io/npm/v/gbit-db?style=for-the-badge&logo=npm&logoColor=white" alt="NPM Version"/>
-
-  <img src="https://img.shields.io/npm/dm/gbit-db?style=for-the-badge&logo=npm&logoColor=white" alt="NPM Downloads"/>
-
-  <img src="https://img.shields.io/npm/l/gbit-db?style=for-the-badge" alt="License"/>
 
   <img src="https://img.shields.io/badge/Full--Stack-Backend%20%2B%20Frontend-00C853?style=for-the-badge" alt="Full Stack"/>
 
@@ -84,7 +79,12 @@ _ gbit-container dashboard
 
 
 
-Sem isso, o projeto não reconhece as coleções novas. É o único passo manual do fluxo — todo o resto sobe sozinho.
+## Dashboard app web
+
+<p align="center">
+  <img src="assets/gbit-container-dashboard.png" width="1200">
+</p>
+
 
 ## As 4 URLs
 
