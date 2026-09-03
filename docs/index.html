@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>gbit-db — Backend completo em um comando</title>
+<meta name="description" content="npx gbit-db cria um backend Next.js + TypeScript com banco de dados integrado, pronto pra rodar sem Docker.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f14;
+    --bg-elevated: #11161d;
+    --bg-elevated-2: #161d27;
+    --border: #232b36;
+    --border-soft: #1a212b;
+    --cyan: #38bdf8;
+    --blue: #2563eb;
+    --green: #22c55e;
+    --amber: #eab308;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --text-dimmer: #5b6675;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  code, .mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  .wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 0 20px; }
+  }
+
+  /* ---------- background texture ---------- */
+  .bg-grid {
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 18% 20%, rgba(56,189,248,0.08), transparent 45%),
+      radial-gradient(circle at 85% 5%, rgba(37,99,235,0.10), transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ---------- nav ---------- */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(11,15,20,0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  nav {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+  }
+
+  .brand-mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: linear-gradient(135deg, var(--cyan), var(--blue));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: #0b0f14;
+    flex-shrink: 0;
+  }
+
+  .brand span.dim { color: var(--text-dim); font-weight: 500; }
+
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    font-size: 14.5px;
+    color: var(--text-dim);
+  }
+
+  .nav-links a:hover { color: var(--text); }
+
+  @media (max-width: 720px) {
+    .nav-links { display: none; }
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    transition: border-color .15s ease, transform .15s ease;
+  }
+
+  .btn-primary {
+    background: var(--cyan);
+    color: #061019;
+    border-color: var(--cyan);
+  }
+  .btn-primary:hover { transform: translateY(-1px); }
+
+  .btn-ghost {
+    color: var(--text);
+    background: transparent;
+  }
+  .btn-ghost:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  /* ---------- hero ---------- */
+  .hero {
+    position: relative;
+    z-index: 1;
+    padding: 96px 0 80px;
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 56px;
+    align-items: center;
+  }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; padding: 56px 0 48px; gap: 40px; }
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--cyan);
+    background: rgba(56,189,248,0.08);
+    border: 1px solid rgba(56,189,248,0.25);
+    padding: 6px 12px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+  }
+
+  .eyebrow .pulse {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 rgba(34,197,94,0.5);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); }
+    70% { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+    100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+  }
+
+  .hero h1 {
+    font-size: 52px;
+    margin-bottom: 22px;
+  }
+
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 36px; }
+  }
+
+  .hero h1 .accent {
+    background: linear-gradient(90deg, var(--cyan), var(--blue));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .hero p.lead {
+    font-size: 18px;
+    color: var(--text-dim);
+    max-width: 480px;
+    margin-bottom: 32px;
+  }
+
+  .hero-ctas {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+  }
+
+  .install-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14.5px;
+  }
+
+  .install-line .prompt { color: var(--green); }
+  .install-line .cmd { color: var(--text); }
+
+  .copy-btn {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--text-dimmer);
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color .15s ease, background .15s ease;
+  }
+  .copy-btn:hover { color: var(--cyan); background: rgba(56,189,248,0.08); }
+
+  /* ---------- terminal mockup ---------- */
+  .terminal {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6);
+  }
+
+  .terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .terminal-bar .terminal-title {
+    margin-left: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--text-dimmer);
+  }
+
+  .terminal-body {
+    padding: 20px 20px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    min-height: 320px;
+    color: var(--text-dim);
+  }
+
+  .terminal-body .line { margin-bottom: 6px; white-space: pre-wrap; }
+  .terminal-body .prompt-char { color: var(--green); }
+  .terminal-body .typed { color: var(--text); }
+  .terminal-body .ok { color: var(--green); }
+  .terminal-body .muted { color: var(--text-dimmer); }
+  .terminal-body .cursor {
+    display: inline-block;
+    width: 7px; height: 15px;
+    background: var(--cyan);
+    vertical-align: middle;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ---------- section shell ---------- */
+  section { position: relative; z-index: 1; padding: 72px 0; }
+  .section-head { max-width: 620px; margin-bottom: 44px; }
+  .section-head h2 { font-size: 32px; margin-bottom: 14px; }
+  .section-head p { color: var(--text-dim); font-size: 16px; }
+
+  /* ---------- URLs strip ---------- */
+  .urls-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 780px) { .urls-grid { grid-template-columns: 1fr; } }
+
+  .url-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .url-card .top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .url-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px rgba(34,197,94,0.6); }
+  .url-card .name { font-weight: 600; font-size: 15.5px; }
+  .url-card .role { color: var(--text-dim); font-size: 13.5px; margin-bottom: 14px; }
+  .url-card .addr {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    color: var(--cyan);
+    background: rgba(56,189,248,0.06);
+    border: 1px solid rgba(56,189,248,0.18);
+    border-radius: 7px;
+    padding: 8px 10px;
+    display: inline-block;
+  }
+
+  /* ---------- bento features ---------- */
+  .bento {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 16px;
+  }
+  @media (max-width: 780px) { .bento { grid-template-columns: 1fr; } }
+
+  .bento-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+  }
+
+  .bento-card.wide { grid-row: span 2; }
+
+  .bento-card h3 {
+    font-size: 19px;
+    margin-bottom: 10px;
+  }
+  .bento-card p { color: var(--text-dim); font-size: 14.5px; }
+
+  .bento-card .tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--cyan);
+    background: rgba(56,189,248,0.08);
+    border: 1px solid rgba(56,189,248,0.2);
+    border-radius: 6px;
+    padding: 3px 8px;
+    margin-bottom: 14px;
+  }
+
+  .mini-code {
+    margin-top: 16px;
+    background: var(--bg);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    overflow-x: auto;
+  }
+  .mini-code .kw { color: var(--cyan); }
+  .mini-code .str { color: var(--green); }
+
+  /* ---------- steps ---------- */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    padding: 24px 26px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-elevated);
+  }
+  .step:last-child { border-bottom: none; }
+  .step:nth-child(even) { background: var(--bg-elevated-2); }
+
+  .step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--cyan);
+    font-weight: 700;
+  }
+
+  .step-body h4 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16.5px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .step-body p { color: var(--text-dim); font-size: 14.5px; margin-bottom: 10px; }
+
+  .step-body code.block {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border-soft);
+    padding: 8px 12px;
+    border-radius: 7px;
+  }
+
+  /* ---------- structure ---------- */
+  .structure-wrap {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 32px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    color: var(--text-dim);
+    overflow-x: auto;
+  }
+  .structure-wrap .folder { color: var(--cyan); }
+  .structure-wrap .comment { color: var(--text-dimmer); }
+
+  /* ---------- final CTA ---------- */
+  .cta-final {
+    text-align: center;
+    padding: 90px 0 100px;
+  }
+  .cta-final h2 { font-size: 34px; margin-bottom: 16px; }
+  .cta-final p { color: var(--text-dim); margin-bottom: 32px; }
+
+  .cta-final .install-line { margin: 0 auto 28px; }
+
+  .cta-buttons { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+
+  /* ---------- footer ---------- */
+  footer {
+    border-top: 1px solid var(--border-soft);
+    padding: 32px 0;
+  }
+  footer .wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 13.5px;
+    color: var(--text-dimmer);
+  }
+  footer a:hover { color: var(--cyan); }
+  footer .foot-links { display: flex; gap: 22px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .eyebrow .pulse, .cursor { animation: none; }
+  }
+
+  ::selection { background: rgba(56,189,248,0.25); }
+
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+
+<header>
+  <nav>
+    <div class="brand">
+      <div class="brand-mark">DB</div>
+      gbit-db
+    </div>
+    <div class="nav-links">
+      <a href="#urls">As 3 URLs</a>
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#estrutura">Estrutura</a>
+      <a href="https://github.com/Gislaine-programadora/gbit-db-cli-gbit-db">GitHub</a>
+    </div>
+    <a class="btn btn-primary" href="https://www.npmjs.com/package/gbit-db">npm install</a>
+  </nav>
+</header>
+
+<main class="wrap">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div>
+      <div class="eyebrow"><span class="pulse"></span> integra com gbit-container</div>
+      <h1>Backend completo,<br><span class="accent">um comando só.</span></h1>
+      <p class="lead">
+        <code class="mono">npx gbit-db</code> gera um projeto Next.js com banco de dados
+        já integrado e rodando — sem configurar conexão, sem instalar Docker.
+      </p>
+      <div class="install-line">
+        <span class="prompt">$</span>
+        <span class="cmd">npx gbit-db meu-projeto</span>
+        <button class="copy-btn" onclick="copyCmd(this)">copiar</button>
+      </div>
+      <div class="hero-ctas">
+        <a class="btn btn-ghost" href="#como-funciona">Ver como funciona</a>
+        <a class="btn btn-ghost" href="https://github.com/Gislaine-programadora/gbit-db-cli-gbit-db">★ GitHub</a>
+      </div>
+    </div>
+
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="terminal-dot" style="background:#ff5f56"></div>
+        <div class="terminal-dot" style="background:#ffbd2e"></div>
+        <div class="terminal-dot" style="background:#27c93f"></div>
+        <span class="terminal-title">terminal</span>
+      </div>
+      <div class="terminal-body" id="termBody"></div>
+    </div>
+  </section>
+
+  <!-- URLS -->
+  <section id="urls">
+    <div class="section-head">
+      <h2>Três serviços, já no ar</h2>
+      <p>Depois do <code class="mono">gbit-container up</code>, é só copiar a URL e colar no navegador. Nenhum precisa ser iniciado à mão.</p>
+    </div>
+    <div class="urls-grid">
+      <div class="url-card">
+        <div class="top"><span class="url-dot"></span><span class="name">App</span></div>
+        <div class="role">Frontend Next.js 15</div>
+        <div class="addr">localhost:3000</div>
+      </div>
+      <div class="url-card">
+        <div class="top"><span class="url-dot"></span><span class="name">GBIT Database</span></div>
+        <div class="role">Backend + gbit-db-dados integrado</div>
+        <div class="addr">localhost:4200</div>
+      </div>
+      <div class="url-card">
+        <div class="top"><span class="url-dot"></span><span class="name">Portal</span></div>
+        <div class="role">Endpoints + IA de código</div>
+        <div class="addr">localhost:4100/portal</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section>
+    <div class="section-head">
+      <h2>O que já vem pronto</h2>
+      <p>Nada disso precisa ser configurado depois de gerar o projeto.</p>
+    </div>
+    <div class="bento">
+      <div class="bento-card wide">
+        <span class="tag">banco de dados</span>
+        <h3>gbit-db-dados já conectado ao backend</h3>
+        <p>
+          O motor de banco de dados roda dentro do próprio GBIT Database — não é um serviço
+          separado que você precisa apontar host, porta e senha. Assim que o servidor sobe
+          na porta 4200, o banco já está respondendo.
+        </p>
+        <div class="mini-code">GET <span class="str">/</span> → <span class="kw">{ "engine": "GBIT Database", "status": "online" }</span></div>
+      </div>
+      <div class="bento-card">
+        <span class="tag">portal</span>
+        <h3>IA de código offline</h3>
+        <p>Descreve uma tabela em texto e o Portal gera schema, rotas de API e tipos TypeScript prontos para copiar. Sem chave de API.</p>
+      </div>
+      <div class="bento-card">
+        <span class="tag">orquestração</span>
+        <h3>Pronto para o gbit-container</h3>
+        <p>Escolha o stack <code class="mono">gbit-db</code> e suba App, Database e Portal juntos, com dashboard e sem Docker.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMO FUNCIONA -->
+  <section id="como-funciona">
+    <div class="section-head">
+      <h2>Como funciona</h2>
+      <p>Do zero até as três URLs abertas no navegador.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-body">
+          <h4>Gerar o projeto</h4>
+          <p>Cria a estrutura completa na pasta atual.</p>
+          <code class="block">npx gbit-db meu-projeto</code>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-body">
+          <h4>Instalar as dependências</h4>
+          <p>Na raiz do projeto e dentro de <code class="mono">gbit-database/</code>.</p>
+          <code class="block">npm install</code>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-body">
+          <h4>Escolher o stack no gbit-container</h4>
+          <p>Gera a configuração dos três serviços automaticamente.</p>
+          <code class="block">gbit-container stack gbit-db</code>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-body">
+          <h4>Subir tudo</h4>
+          <p>App, Database e Portal sobem juntos.</p>
+          <code class="block">gbit-container up</code>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">05</div>
+        <div class="step-body">
+          <h4>Abrir o dashboard e copiar a URL</h4>
+          <p>Sem rodar nada manualmente a partir daqui.</p>
+          <code class="block">gbit-container dashboard</code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ESTRUTURA -->
+  <section id="estrutura">
+    <div class="section-head">
+      <h2>Estrutura do projeto gerado</h2>
+      <p>Tudo organizado desde o primeiro comando.</p>
+    </div>
+    <div class="structure-wrap">
+<pre><span class="folder">meu-projeto/</span>
+├── src/                    <span class="comment"># páginas, rotas de API, portal</span>
+├── <span class="folder">gbit-database/</span>          <span class="comment"># servidor do banco (roda em :4200)</span>
+│   └── server.js
+├── scripts/                <span class="comment"># portal.mjs</span>
+├── gbit.yml                <span class="comment"># gerado por `gbit-container stack gbit-db`</span>
+├── next.config.mjs
+├── tsconfig.json
+└── package.json</pre>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="cta-final">
+    <h2>Comece agora</h2>
+    <p>Um comando, e o backend já está de pé.</p>
+    <div class="install-line">
+      <span class="prompt">$</span>
+      <span class="cmd">npx gbit-db meu-projeto</span>
+      <button class="copy-btn" onclick="copyCmd(this)">copiar</button>
+    </div>
+    <div class="cta-buttons">
+      <a class="btn btn-primary" href="https://www.npmjs.com/package/gbit-db">Ver no npm</a>
+      <a class="btn btn-ghost" href="https://github.com/Gislaine-programadora/gbit-db-cli-gbit-db">Código no GitHub</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>gbit-db · MIT License</span>
+    <div class="foot-links">
+      <a href="https://github.com/Gislaine-programadora/gbit-db-cli-gbit-db">GitHub</a>
+      <a href="https://www.npmjs.com/package/gbit-db">npm</a>
+      <a href="https://github.com/Gislaine-programadora/gbit-container">gbit-container</a>
+      <a href="mailto:gislainelophes@gmail.com">Contato</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function copyCmd(btn) {
+    navigator.clipboard.writeText('npx gbit-db meu-projeto').then(() => {
+      const original = btn.textContent;
+      btn.textContent = 'copiado!';
+      setTimeout(() => btn.textContent = original, 1500);
+    });
+  }
+
+  // ---- terminal typing sequence ----
+  const termBody = document.getElementById('termBody');
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const script = [
+    { type: 'cmd', text: 'npx gbit-db meu-projeto' },
+    { type: 'out', text: 'criando estrutura do projeto...' },
+    { type: 'out', text: '  + src/app' },
+    { type: 'out', text: '  + gbit-database/server.js' },
+    { type: 'out', text: '  + scripts/portal.mjs' },
+    { type: 'ok',  text: 'projeto criado em ./meu-projeto' },
+    { type: 'gap' },
+    { type: 'cmd', text: 'gbit-container stack gbit-db' },
+    { type: 'ok',  text: 'gbit.yml gerado (3 servicos)' },
+    { type: 'gap' },
+    { type: 'cmd', text: 'gbit-container up' },
+    { type: 'ok',  text: 'app       -> :3000  rodando' },
+    { type: 'ok',  text: 'database  -> :4200  rodando' },
+    { type: 'ok',  text: 'portal    -> :4100  rodando' },
+  ];
+
+  function renderStatic() {
+    termBody.innerHTML = script.map(line => {
+      if (line.type === 'gap') return '<div class="line">&nbsp;</div>';
+      if (line.type === 'cmd') return `<div class="line"><span class="prompt-char">$</span> <span class="typed">${line.text}</span></div>`;
+      if (line.type === 'ok') return `<div class="line ok">✓ ${line.text}</div>`;
+      return `<div class="line muted">${line.text}</div>`;
+    }).join('');
+  }
+
+  async function typeSequence() {
+    for (const line of script) {
+      if (line.type === 'gap') {
+        termBody.insertAdjacentHTML('beforeend', '<div class="line">&nbsp;</div>');
+        continue;
+      }
+      const row = document.createElement('div');
+      row.className = 'line' + (line.type === 'ok' ? ' ok' : line.type === 'out' ? ' muted' : '');
+      termBody.appendChild(row);
+
+      if (line.type === 'cmd') {
+        row.innerHTML = '<span class="prompt-char">$</span> <span class="typed"></span><span class="cursor"></span>';
+        const typedSpan = row.querySelector('.typed');
+        const cursor = row.querySelector('.cursor');
+        for (let i = 0; i < line.text.length; i++) {
+          typedSpan.textContent += line.text[i];
+          await sleep(28);
+        }
+        await sleep(200);
+        cursor.remove();
+        await sleep(150);
+      } else {
+        row.textContent = (line.type === 'ok' ? '✓ ' : '') + line.text;
+        await sleep(120);
+      }
+    }
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  if (prefersReduced) {
+    renderStatic();
+  } else {
+    typeSequence().then(() => {
+      // loop gently after a pause
+      setTimeout(async function loop() {
+        termBody.innerHTML = '';
+        await typeSequence();
+        setTimeout(loop, 4000);
+      }, 4000);
+    });
+  }
+</script>
+
+</body>
+</html>
