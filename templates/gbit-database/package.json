@@ -1,0 +1,33 @@
+{
+  "name": "database-gbit",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Native Database Engine for GBIT DB",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node test.js",
+    "backup": "node engine/backup.js",
+    "migrate": "node engine/migrate.js",
+    "seed": "node engine/seed.js",
+    "status": "node engine/status.js",
+    "doctor": "node engine/doctor.js"
+  },
+  "keywords": [
+    "gbit",
+    "database",
+    "database-engine",
+    "orm",
+    "query-builder",
+    "json-database",
+    "web3"
+  ],
+  "author": "Gislaine Gbit",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.1.0"
+  }
+}

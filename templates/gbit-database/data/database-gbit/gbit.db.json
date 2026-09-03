@@ -1,0 +1,14 @@
+{
+  "signature": "GBIT_DB",
+  "version": "1.0.0",
+  "engine": "GBIT Database Engine",
+  "createdAt": "",
+  "updatedAt": "",
+  "settings": {
+    "autoBackup": true,
+    "encryption": false,
+    "compression": false
+  },
+  "indexes": {},
+  "metadata": {}
+}

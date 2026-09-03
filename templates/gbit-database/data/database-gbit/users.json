@@ -1,0 +1,20 @@
+[
+    {
+        "id": 1,
+        "name": "GBIT",
+        "email": "dev@gbit.com",
+        "age": 1
+    },
+    {
+        "id": 2,
+        "name": "Maria",
+        "email": "maria@gbit.com",
+        "age": 25
+    },
+    {
+        "id": 3,
+        "name": "João",
+        "email": "joao@gbit.com",
+        "age": 15
+    }
+]
